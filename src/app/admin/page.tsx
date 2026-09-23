@@ -5,6 +5,7 @@ import { surveys, responses, students } from "@/lib/db/schema";
 import { asc } from "drizzle-orm";
 import { logoutAction } from "./actions";
 import { RosterForm } from "./RosterForm";
+import { SinuLogo } from "@/components/SinuLogo";
 
 const TARGET_PER_STUDENT = 10;
 
@@ -48,7 +49,10 @@ export default async function AdminDashboardPage() {
     <div className="min-h-screen bg-slate-50">
       <header className="bg-white border-b border-slate-200">
         <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="text-lg font-semibold text-slate-900">Survey Shark — Admin</h1>
+          <div className="flex items-center gap-3">
+            <SinuLogo />
+            <h1 className="text-lg font-semibold text-slate-900">Survey Shark — Admin</h1>
+          </div>
           <form action={logoutAction}>
             <button className="text-sm text-slate-500 hover:text-slate-900">Sign out</button>
           </form>

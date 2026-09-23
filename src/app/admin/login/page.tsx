@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { loginAction } from "./actions";
+import { SinuLogo } from "@/components/SinuLogo";
 
 export default function AdminLoginPage() {
   const [state, formAction, pending] = useActionState(loginAction, undefined);
@@ -10,6 +11,7 @@ export default function AdminLoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
       <form action={formAction} className="w-full max-w-sm bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-4">
         <div>
+          <SinuLogo className="mb-3" />
           <h1 className="text-lg font-semibold text-slate-900">Admin login</h1>
           <p className="text-sm text-slate-500">Survey Shark researcher dashboard</p>
         </div>

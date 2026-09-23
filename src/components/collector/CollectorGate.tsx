@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { getCollectorSession, setCollectorSession, type CollectorSession } from "@/lib/collector/session";
 import { SurveyRunner } from "@/components/survey/SurveyRunner";
+import { SinuLogo } from "@/components/SinuLogo";
 import type { SurveyDefinition } from "@/lib/surveys/types";
 
 export function CollectorGate({ definition }: { definition: SurveyDefinition }) {
@@ -55,6 +56,7 @@ function AccessGateForm({ onVerified }: { onVerified: (session: CollectorSession
     <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
       <form onSubmit={handleSubmit} className="w-full max-w-sm bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-4">
         <div>
+          <SinuLogo className="mb-3" />
           <h1 className="text-lg font-semibold text-slate-900">Field data collection</h1>
           <p className="text-sm text-slate-500">Enter the codes given by your supervisor. You only need to do this once per device.</p>
         </div>

@@ -125,6 +125,7 @@ export function SurveyRunner({ definition, studentCode }: { definition: SurveyDe
     return (
       <div className="max-w-lg lg:max-w-2xl mx-auto px-4 py-10">
         <SyncStatusBar slug={definition.slug} />
+        <ParticipantCodeBadge code={participantCode} />
         <div className="bg-white rounded-xl border border-slate-200 p-6 lg:p-10 text-center space-y-3">
           {(definition.screenOutText ?? []).map((t, i) => (
             <p key={i} className="text-slate-600 text-sm">
@@ -144,6 +145,7 @@ export function SurveyRunner({ definition, studentCode }: { definition: SurveyDe
     return (
       <div className="max-w-lg lg:max-w-2xl mx-auto px-4 py-10">
         <SyncStatusBar slug={definition.slug} />
+        <ParticipantCodeBadge code={participantCode} />
         <div className="bg-white rounded-xl border border-slate-200 p-6 lg:p-10 text-center space-y-3">
           {(definition.thankYouText ?? []).map((t, i) => (
             <p key={i} className="text-slate-600 text-sm">
@@ -162,6 +164,7 @@ export function SurveyRunner({ definition, studentCode }: { definition: SurveyDe
   return (
     <div className="max-w-lg lg:max-w-2xl mx-auto px-4 py-6 pb-28">
       <SyncStatusBar slug={definition.slug} />
+      <ParticipantCodeBadge code={participantCode} />
 
       <div className="mb-4">
         <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
@@ -198,6 +201,15 @@ export function SurveyRunner({ definition, studentCode }: { definition: SurveyDe
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+function ParticipantCodeBadge({ code }: { code: string }) {
+  return (
+    <div className="mb-4 flex items-center justify-between rounded-lg bg-slate-900 px-4 py-3">
+      <span className="text-[11px] font-medium uppercase tracking-wide text-slate-400">Participant code</span>
+      <span className="font-mono text-base font-bold text-white">{code}</span>
     </div>
   );
 }

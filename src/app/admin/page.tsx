@@ -2,7 +2,8 @@ import { redirect } from "next/navigation";
 import { isAdminAuthenticated } from "@/lib/auth/admin";
 import { db } from "@/lib/db";
 import { surveys, responses, students } from "@/lib/db/schema";
-import { asc } from "drizzle-orm";
+import { asc, desc } from "drizzle-orm";
+import Link from "next/link";
 import { logoutAction } from "./actions";
 import { RosterForm } from "./RosterForm";
 import { SinuLogo } from "@/components/SinuLogo";
@@ -11,10 +12,22 @@ import { TARGET_PER_STUDENT } from "@/lib/surveys/constants";
 export default async function AdminDashboardPage() {
   if (!(await isAdminAuthenticated())) redirect("/admin/login");
 
-  const [surveyRows, allResponses, rosterRows] = await Promise.all([
+  const [surveyRows, allResponses, rosterRows, recentResponses] = await Promise.all([
     db.select().from(surveys).orderBy(asc(surveys.createdAt)),
     db.select({ surveySlug: responses.surveySlug, status: responses.status, studentCode: responses.studentCode }).from(responses),
     db.select().from(students).orderBy(asc(students.studentCode)),
+    db
+      .select({
+        clientUuid: responses.clientUuid,
+        participantCode: responses.participantCode,
+        studentCode: responses.studentCode,
+        surveySlug: responses.surveySlug,
+        status: responses.status,
+        submittedAt: responses.submittedAt,
+      })
+      .from(responses)
+      .orderBy(desc(responses.submittedAt))
+      .limit(30),
   ]);
 
   const latestBySlug = new Map<string, (typeof surveyRows)[number]>();
@@ -101,6 +114,52 @@ export default async function AdminDashboardPage() {
                 </div>
               );
             })}
+          </div>
+        </section>
+
+        <section>
+          <h2 className="text-sm font-medium text-slate-500 mb-3">Recent responses</h2>
+          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-slate-50 text-slate-500">
+                <tr>
+                  <th className="text-left font-medium px-4 py-2">Participant code</th>
+                  <th className="text-left font-medium px-4 py-2">Student</th>
+                  <th className="text-left font-medium px-4 py-2">Status</th>
+                  <th className="text-left font-medium px-4 py-2">Submitted</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentResponses.map((r) => (
+                  <tr key={r.clientUuid} className="border-t border-slate-100 hover:bg-slate-50">
+                    <td className="px-4 py-2">
+                      <Link href={`/admin/responses/${r.clientUuid}`} className="font-mono text-xs font-semibold text-slate-900 underline">
+                        {r.participantCode}
+                      </Link>
+                    </td>
+                    <td className="px-4 py-2 font-mono text-xs text-slate-600">{r.studentCode}</td>
+                    <td className="px-4 py-2">
+                      {r.status === "completed" ? (
+                        <span className="text-green-700 bg-green-50 rounded-full px-2 py-0.5 text-xs font-medium">Completed</span>
+                      ) : (
+                        <span className="text-amber-700 bg-amber-50 rounded-full px-2 py-0.5 text-xs font-medium">Screened out</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-2 text-slate-500 whitespace-nowrap">{r.submittedAt.toLocaleString()}</td>
+                  </tr>
+                ))}
+                {recentResponses.length === 0 && (
+                  <tr>
+                    <td colSpan={4} className="px-4 py-6 text-center text-slate-400">
+                      No responses submitted yet.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+            {recentResponses.length === 30 && (
+              <p className="px-4 py-2 text-xs text-slate-400 border-t border-slate-100">Showing the 30 most recent — export CSV for the full list.</p>
+            )}
           </div>
         </section>
 

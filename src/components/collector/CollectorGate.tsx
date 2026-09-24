@@ -43,8 +43,7 @@ export function AccessGateForm({ onVerified }: { onVerified: (session: Collector
         setError(data.error ?? "Could not verify. Check your codes and try again.");
         return;
       }
-      setCollectorSession(data.studentCode);
-      onVerified({ studentCode: data.studentCode, verifiedAt: new Date().toISOString() });
+      onVerified(setCollectorSession(data.studentCode));
     } catch {
       setError("No connection. You need internet the first time you open this app.");
     } finally {

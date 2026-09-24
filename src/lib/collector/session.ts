@@ -23,10 +23,12 @@ export function getCollectorSession(): CollectorSession | null {
   }
 }
 
-export function setCollectorSession(studentCode: string) {
-  if (typeof window === "undefined") return;
+export function setCollectorSession(studentCode: string): CollectorSession {
   const session: CollectorSession = { studentCode, verifiedAt: new Date().toISOString() };
-  window.localStorage.setItem(KEY, JSON.stringify(session));
+  if (typeof window !== "undefined") {
+    window.localStorage.setItem(KEY, JSON.stringify(session));
+  }
+  return session;
 }
 
 export function clearCollectorSession() {

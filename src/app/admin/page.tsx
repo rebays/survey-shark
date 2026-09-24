@@ -2,32 +2,35 @@ import { redirect } from "next/navigation";
 import { isAdminAuthenticated } from "@/lib/auth/admin";
 import { db } from "@/lib/db";
 import { surveys, responses, students } from "@/lib/db/schema";
-import { asc, desc } from "drizzle-orm";
+import { asc, desc, eq } from "drizzle-orm";
 import Link from "next/link";
 import { logoutAction } from "./actions";
 import { RosterForm } from "./RosterForm";
 import { SinuLogo } from "@/components/SinuLogo";
 import { TARGET_PER_STUDENT } from "@/lib/surveys/constants";
 
-export default async function AdminDashboardPage() {
+const RESPONSE_LIST_COLUMNS = {
+  clientUuid: responses.clientUuid,
+  participantCode: responses.participantCode,
+  studentCode: responses.studentCode,
+  status: responses.status,
+  submittedAt: responses.submittedAt,
+};
+
+export default async function AdminDashboardPage({ searchParams }: { searchParams: Promise<{ student?: string }> }) {
   if (!(await isAdminAuthenticated())) redirect("/admin/login");
 
-  const [surveyRows, allResponses, rosterRows, recentResponses] = await Promise.all([
+  const { student: studentFilterRaw } = await searchParams;
+  const studentFilter = studentFilterRaw?.trim() || undefined;
+
+  const [surveyRows, allResponses, rosterRows, recentResponses, filteredResponses] = await Promise.all([
     db.select().from(surveys).orderBy(asc(surveys.createdAt)),
     db.select({ surveySlug: responses.surveySlug, status: responses.status, studentCode: responses.studentCode }).from(responses),
     db.select().from(students).orderBy(asc(students.studentCode)),
-    db
-      .select({
-        clientUuid: responses.clientUuid,
-        participantCode: responses.participantCode,
-        studentCode: responses.studentCode,
-        surveySlug: responses.surveySlug,
-        status: responses.status,
-        submittedAt: responses.submittedAt,
-      })
-      .from(responses)
-      .orderBy(desc(responses.submittedAt))
-      .limit(30),
+    db.select(RESPONSE_LIST_COLUMNS).from(responses).orderBy(desc(responses.submittedAt)).limit(30),
+    studentFilter
+      ? db.select(RESPONSE_LIST_COLUMNS).from(responses).where(eq(responses.studentCode, studentFilter)).orderBy(asc(responses.submittedAt))
+      : Promise.resolve(null),
   ]);
 
   const latestBySlug = new Map<string, (typeof surveyRows)[number]>();
@@ -118,26 +121,65 @@ export default async function AdminDashboardPage() {
         </section>
 
         <section>
-          <h2 className="text-sm font-medium text-slate-500 mb-3">Recent responses</h2>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-medium text-slate-500">
+              {studentFilter ? (
+                <>
+                  Responses for <span className="font-mono">{studentFilter}</span>, oldest first
+                </>
+              ) : (
+                "Recent responses"
+              )}
+            </h2>
+            {studentFilter && (
+              <Link href="/admin" className="text-xs text-slate-500 underline">
+                Clear filter
+              </Link>
+            )}
+          </div>
+
+          <form method="get" action="/admin" className="flex items-center gap-2 mb-3">
+            <select
+              key={studentFilter ?? "all"}
+              name="student"
+              defaultValue={studentFilter ?? ""}
+              className="rounded-md border border-slate-300 px-2 py-1.5 text-sm bg-white"
+            >
+              <option value="">All students (most recent 30)</option>
+              {Array.from(allStudentCodes)
+                .sort()
+                .map((code) => (
+                  <option key={code} value={code}>
+                    {code}
+                  </option>
+                ))}
+            </select>
+            <button type="submit" className="text-sm font-medium rounded-md bg-slate-900 text-white px-3 py-1.5 hover:bg-slate-800">
+              View
+            </button>
+          </form>
+
           <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
             <table className="w-full text-sm">
               <thead className="bg-slate-50 text-slate-500">
                 <tr>
+                  {studentFilter && <th className="text-left font-medium px-4 py-2 w-10">#</th>}
                   <th className="text-left font-medium px-4 py-2">Participant code</th>
-                  <th className="text-left font-medium px-4 py-2">Student</th>
+                  {!studentFilter && <th className="text-left font-medium px-4 py-2">Student</th>}
                   <th className="text-left font-medium px-4 py-2">Status</th>
                   <th className="text-left font-medium px-4 py-2">Submitted</th>
                 </tr>
               </thead>
               <tbody>
-                {recentResponses.map((r) => (
+                {(studentFilter ? filteredResponses ?? [] : recentResponses).map((r, i) => (
                   <tr key={r.clientUuid} className="border-t border-slate-100 hover:bg-slate-50">
+                    {studentFilter && <td className="px-4 py-2 text-slate-400">{i + 1}</td>}
                     <td className="px-4 py-2">
                       <Link href={`/admin/responses/${r.clientUuid}`} className="font-mono text-xs font-semibold text-slate-900 underline">
                         {r.participantCode}
                       </Link>
                     </td>
-                    <td className="px-4 py-2 font-mono text-xs text-slate-600">{r.studentCode}</td>
+                    {!studentFilter && <td className="px-4 py-2 font-mono text-xs text-slate-600">{r.studentCode}</td>}
                     <td className="px-4 py-2">
                       {r.status === "completed" ? (
                         <span className="text-green-700 bg-green-50 rounded-full px-2 py-0.5 text-xs font-medium">Completed</span>
@@ -148,17 +190,19 @@ export default async function AdminDashboardPage() {
                     <td className="px-4 py-2 text-slate-500 whitespace-nowrap">{r.submittedAt.toLocaleString()}</td>
                   </tr>
                 ))}
-                {recentResponses.length === 0 && (
+                {(studentFilter ? filteredResponses ?? [] : recentResponses).length === 0 && (
                   <tr>
-                    <td colSpan={4} className="px-4 py-6 text-center text-slate-400">
-                      No responses submitted yet.
+                    <td colSpan={studentFilter ? 4 : 4} className="px-4 py-6 text-center text-slate-400">
+                      {studentFilter ? "No responses for this student yet." : "No responses submitted yet."}
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
-            {recentResponses.length === 30 && (
-              <p className="px-4 py-2 text-xs text-slate-400 border-t border-slate-100">Showing the 30 most recent — export CSV for the full list.</p>
+            {!studentFilter && recentResponses.length === 30 && (
+              <p className="px-4 py-2 text-xs text-slate-400 border-t border-slate-100">
+                Showing the 30 most recent — filter by student above to see everyone&apos;s, or export CSV for the full list.
+              </p>
             )}
           </div>
         </section>
@@ -190,7 +234,11 @@ export default async function AdminDashboardPage() {
               <tbody>
                 {studentTable.map((s) => (
                   <tr key={s.code} className="border-t border-slate-100">
-                    <td className="px-4 py-2 font-mono text-xs">{s.code}</td>
+                    <td className="px-4 py-2">
+                      <Link href={`/admin?student=${encodeURIComponent(s.code)}`} className="font-mono text-xs underline text-slate-900">
+                        {s.code}
+                      </Link>
+                    </td>
                     <td className="px-4 py-2">{s.completed}</td>
                     <td className="px-4 py-2 text-slate-500">{s.total - s.completed}</td>
                     <td className="px-4 py-2">

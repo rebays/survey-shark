@@ -39,7 +39,7 @@ function isAnswered(question: Question, answer: AnswerValue | undefined): boolea
 export function SurveyRunner({ definition, studentCode }: { definition: SurveyDefinition; studentCode: string }) {
   const [participantCode, setParticipantCode] = useState(() => generateParticipantCode(studentCode));
   const [sectionIndex, setSectionIndex] = useState(0);
-  const [answers, setAnswers] = useState<AnswersMap>(() => buildPrefilledAnswers(definition, studentCode, generateParticipantCode(studentCode)));
+  const [answers, setAnswers] = useState<AnswersMap>(() => buildPrefilledAnswers(definition, studentCode, participantCode));
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [phase, setPhase] = useState<Phase>("in_progress");
   const [startedAt, setStartedAt] = useState(() => new Date().toISOString());

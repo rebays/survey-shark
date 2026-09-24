@@ -123,9 +123,9 @@ export function SurveyRunner({ definition, studentCode }: { definition: SurveyDe
 
   if (phase === "screened_out") {
     return (
-      <div className="max-w-lg mx-auto px-4 py-10">
-        <SyncStatusBar />
-        <div className="bg-white rounded-xl border border-slate-200 p-6 text-center space-y-3">
+      <div className="max-w-lg lg:max-w-2xl mx-auto px-4 py-10">
+        <SyncStatusBar slug={definition.slug} />
+        <div className="bg-white rounded-xl border border-slate-200 p-6 lg:p-10 text-center space-y-3">
           {(definition.screenOutText ?? []).map((t, i) => (
             <p key={i} className="text-slate-600 text-sm">
               {t}
@@ -142,9 +142,9 @@ export function SurveyRunner({ definition, studentCode }: { definition: SurveyDe
 
   if (phase === "completed") {
     return (
-      <div className="max-w-lg mx-auto px-4 py-10">
-        <SyncStatusBar />
-        <div className="bg-white rounded-xl border border-slate-200 p-6 text-center space-y-3">
+      <div className="max-w-lg lg:max-w-2xl mx-auto px-4 py-10">
+        <SyncStatusBar slug={definition.slug} />
+        <div className="bg-white rounded-xl border border-slate-200 p-6 lg:p-10 text-center space-y-3">
           {(definition.thankYouText ?? []).map((t, i) => (
             <p key={i} className="text-slate-600 text-sm">
               {t}
@@ -160,8 +160,8 @@ export function SurveyRunner({ definition, studentCode }: { definition: SurveyDe
   }
 
   return (
-    <div className="max-w-lg mx-auto px-4 py-6 pb-28">
-      <SyncStatusBar />
+    <div className="max-w-lg lg:max-w-2xl mx-auto px-4 py-6 pb-28">
+      <SyncStatusBar slug={definition.slug} />
 
       <div className="mb-4">
         <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
@@ -185,7 +185,7 @@ export function SurveyRunner({ definition, studentCode }: { definition: SurveyDe
       </div>
 
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-4 py-3">
-        <div className="max-w-lg mx-auto flex items-center justify-between gap-3">
+        <div className="max-w-lg lg:max-w-2xl mx-auto flex items-center justify-between gap-3">
           <button
             onClick={handleBack}
             disabled={sectionIndex === 0}
@@ -193,7 +193,7 @@ export function SurveyRunner({ definition, studentCode }: { definition: SurveyDe
           >
             Back
           </button>
-          <button onClick={handleNext} className="flex-1 rounded-md bg-slate-900 text-white text-sm font-medium py-2.5 hover:bg-slate-800">
+          <button onClick={handleNext} className="flex-1 lg:flex-none lg:w-64 rounded-md bg-slate-900 text-white text-sm font-medium py-2.5 hover:bg-slate-800">
             {isLastSection ? "Submit" : "Next"}
           </button>
         </div>

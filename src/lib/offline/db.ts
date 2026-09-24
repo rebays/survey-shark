@@ -39,3 +39,18 @@ export async function getSyncedCount(): Promise<number> {
   if (!offlineDb) return 0;
   return offlineDb.responses.where("syncStatus").equals("synced").count();
 }
+
+// Every response this device has ever queued for one student on one survey,
+// regardless of sync status. Lets the student's own progress view work fully
+// offline (server totals are still the source of truth once reachable).
+export async function getLocalResponses(surveySlug: string, studentCode: string): Promise<QueuedResponse[]> {
+  if (!offlineDb) return [];
+  return offlineDb.responses.where({ surveySlug, studentCode }).toArray();
+}
+
+// Lets a student open one of their own past submissions with no network at all,
+// since the full answers are already sitting on this device from when it was filled in.
+export async function getLocalResponseByClientUuid(clientUuid: string): Promise<QueuedResponse | undefined> {
+  if (!offlineDb) return undefined;
+  return offlineDb.responses.get(clientUuid);
+}

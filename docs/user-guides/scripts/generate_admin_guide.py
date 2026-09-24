@@ -88,6 +88,13 @@ story.append(bullet_list(styles, [
     "A <b>per-student table</b>, sorted so students with the fewest responses appear first, with a "
     "“Target met” or “X to go” badge for each.",
 ]))
+story.append(Paragraph(
+    "Students can also check their own count from their phone — a <b>My progress</b> link is always visible "
+    "while they're collecting data, showing their own completed/screened-out totals and letting them re-open "
+    "any of their own past responses to double-check what they recorded. This should cut down on “how many "
+    "have I done?” questions during fieldwork.",
+    styles["Body"],
+))
 story.append(callout(
     styles, "A student shows 0 or fewer responses than expected",
     "Most often this means their device hasn't had a chance to sync yet (they may still be in the field "

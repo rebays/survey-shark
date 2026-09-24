@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { onSyncStateChange, flushQueue, wireAutoSync } from "@/lib/offline/sync";
 
-export function SyncStatusBar() {
+export function SyncStatusBar({ slug }: { slug: string }) {
   const [state, setState] = useState({ pending: 0, synced: 0, syncing: false });
   const [online, setOnline] = useState(true);
 
@@ -33,11 +34,16 @@ export function SyncStatusBar() {
         {state.pending > 0 && <span> · {state.pending} waiting to sync</span>}
         {state.syncing && <span> · syncing…</span>}
       </div>
-      {state.pending > 0 && (
-        <button onClick={() => void flushQueue()} className="underline hover:text-slate-900">
-          Sync now
-        </button>
-      )}
+      <div className="flex items-center gap-3">
+        {state.pending > 0 && (
+          <button onClick={() => void flushQueue()} className="underline hover:text-slate-900">
+            Sync now
+          </button>
+        )}
+        <Link href={`/collect/${slug}/dashboard`} className="underline hover:text-slate-900">
+          My progress
+        </Link>
+      </div>
     </div>
   );
 }

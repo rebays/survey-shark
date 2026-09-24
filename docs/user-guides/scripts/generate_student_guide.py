@@ -2,14 +2,16 @@ import os
 import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from guide_common import (
-    build_styles, make_doc, cover_block, callout, numbered_steps, bullet_list, hr,
+    build_styles, make_doc, cover_block, callout, numbered_steps, bullet_list, hr, screenshot,
     INK, LINE, PAPER, MARGIN, PAGE_W,
 )
 from reportlab.platypus import Paragraph, Spacer, Table, TableStyle, KeepTogether, PageBreak
 from reportlab.lib.units import inch
 from reportlab.lib import colors
 
-OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "Survey-Shark-Field-Collector-Guide.pdf")
+HERE = os.path.dirname(os.path.abspath(__file__))
+ASSETS = os.path.join(HERE, "..", "assets", "screenshots")
+OUT = os.path.join(HERE, "..", "Survey-Shark-Field-Collector-Guide.pdf")
 styles = build_styles()
 doc = make_doc(OUT, "Field Collector Guide")
 
@@ -145,13 +147,41 @@ story.append(callout(
     "tip",
 ))
 
-# --- 6. Your target -------------------------------------------------
-story.append(Paragraph("6. Your target", styles["H1"]))
+# --- 6. Checking your progress -------------------------------------------------
+story.append(Paragraph("6. Checking your progress", styles["H1"]))
 story.append(Paragraph(
-    "You are asked to collect <b>10 completed responses</b>. Keep your own tally (paper or phone notes) as "
-    "you go — your supervisor can also see your progress on their dashboard, but it may take a moment to "
-    "update after you sync.",
+    "You are asked to collect <b>10 completed responses</b>. Tap <b>My progress</b> — always visible next to "
+    "the sync status at the top of the screen — at any point to see how you're doing.",
     styles["Body"],
+))
+story.append(screenshot(
+    styles, os.path.join(ASSETS, "survey-my-progress-link.jpg"),
+    "“My progress” is always visible while you're filling in a survey.",
+))
+story.append(Paragraph(
+    "This opens your own dashboard: how many completed responses you have out of your target of 10, how "
+    "many were screened out, and your most recent participants.",
+    styles["Body"],
+))
+story.append(screenshot(
+    styles, os.path.join(ASSETS, "student-dashboard.jpg"),
+    "Your progress dashboard — completed count, screened-out count, and recent activity.",
+))
+story.append(Paragraph(
+    "Tap any row under <b>Recent activity</b> to see every answer you recorded for that participant — useful "
+    "for double-checking your own work, or if your supervisor asks about a specific interview.",
+    styles["Body"],
+))
+story.append(screenshot(
+    styles, os.path.join(ASSETS, "response-detail.jpg"),
+    "Tapping a past participant shows everything you recorded for them.",
+))
+story.append(callout(
+    styles, "Works offline too",
+    "If you filled it in on this phone, tapping a past response opens instantly — no signal needed, since "
+    "the full answers are already saved on the device. A response can only fail to open if it was collected "
+    "on a different device and you don't currently have signal.",
+    "tip",
 ))
 
 # --- 7. Troubleshooting -------------------------------------------------
@@ -171,6 +201,9 @@ trouble_rows = [
     [Paragraph("Not sure if a response actually saved", styles["Body"]),
      Paragraph("Check the sync status bar at the top of the screen — it shows how many are waiting or "
                 "already synced.", styles["Body"])],
+    [Paragraph("A past response won't open", styles["Body"]),
+     Paragraph("It was likely collected on a different device — you'll need signal to load it from the "
+                "server.", styles["Body"])],
     [Paragraph("Anything else", styles["Body"]),
      Paragraph("Contact your supervisor using the details on the front page of this guide.", styles["Body"])],
 ]

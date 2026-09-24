@@ -16,14 +16,21 @@ Both carry the SINU logo (`assets/sinu-logo.png`, also used for in-app branding 
 see `public/branding/` and `src/components/SinuLogo.tsx`) on the cover and in the
 page footer.
 
+The Field Collector Guide includes real app screenshots (`assets/screenshots/`)
+showing the "My progress" dashboard and past-response viewer. If those screens
+change noticeably, retake them: run the dev server, log in as any test student
+(e.g. via `/api/collector/verify`), click through the flow, and use the browser
+tool's screenshot action with `save_to_disk`. Crop out anything unrelated (e.g.
+browser extension overlays) before saving over the files in `assets/screenshots/`.
+
 ## Regenerating
 
-If wording needs to change, edit `scripts/generate_student_guide.py` or
-`scripts/generate_admin_guide.py` (shared styling/helpers live in
-`scripts/guide_common.py`) and run:
+If wording (or a screenshot) changes, edit `scripts/generate_student_guide.py` or
+`scripts/generate_admin_guide.py` (shared styling/helpers, including the
+`screenshot()` embed helper, live in `scripts/guide_common.py`) and run:
 
 ```bash
-python3 -m pip install reportlab   # once
+python3 -m pip install reportlab pillow   # once
 cd docs/user-guides
 python3 scripts/generate_student_guide.py
 python3 scripts/generate_admin_guide.py

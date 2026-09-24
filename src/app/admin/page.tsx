@@ -6,8 +6,7 @@ import { asc } from "drizzle-orm";
 import { logoutAction } from "./actions";
 import { RosterForm } from "./RosterForm";
 import { SinuLogo } from "@/components/SinuLogo";
-
-const TARGET_PER_STUDENT = 10;
+import { TARGET_PER_STUDENT } from "@/lib/surveys/constants";
 
 export default async function AdminDashboardPage() {
   if (!(await isAdminAuthenticated())) redirect("/admin/login");

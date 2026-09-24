@@ -1,5 +1,6 @@
 """Shared styling/helpers for Survey Shark PDF user guides."""
 import os
+from PIL import Image as PILImage
 from reportlab.lib.pagesizes import LETTER
 from reportlab.lib.units import inch
 from reportlab.lib import colors
@@ -81,6 +82,10 @@ def build_styles():
         "TableHeader", parent=styles["Body"], fontName="Helvetica-Bold", fontSize=9.7,
         textColor=colors.white, spaceAfter=0,
     )
+    styles["Caption"] = ParagraphStyle(
+        "Caption", parent=styles["Body"], fontSize=8.7, textColor=MUTED, spaceAfter=14,
+        alignment=TA_CENTER, fontName="Helvetica-Oblique",
+    )
     return styles
 
 
@@ -119,6 +124,33 @@ def bullet_list(styles, items, style_name="Step"):
 
 def hr():
     return HRFlowable(width="100%", thickness=0.75, color=LINE, spaceBefore=4, spaceAfter=10)
+
+
+def screenshot(styles, path, caption=None, width_fraction=1.0):
+    """A bordered app screenshot, scaled to the text column width, with an
+    optional centered caption underneath. Kept together so it never splits
+    across a page break."""
+    max_width = (PAGE_W - 2 * MARGIN) * width_fraction
+    with PILImage.open(path) as im:
+        src_w, src_h = im.size
+    img_w = max_width
+    img_h = img_w * (src_h / src_w)
+    img = Image(path, width=img_w, height=img_h)
+    framed = Table([[img]], colWidths=[img_w])
+    framed.setStyle(TableStyle([
+        ("BOX", (0, 0), (-1, -1), 1, LINE),
+        ("TOPPADDING", (0, 0), (-1, -1), 0),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+    ]))
+    flow = [framed]
+    if caption:
+        flow.append(Spacer(1, 5))
+        flow.append(Paragraph(caption, styles["Caption"]))
+    else:
+        flow.append(Spacer(1, 12))
+    return KeepTogether(flow)
 
 
 def make_doc(filename, title_for_footer):

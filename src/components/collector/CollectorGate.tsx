@@ -22,7 +22,7 @@ export function CollectorGate({ definition }: { definition: SurveyDefinition }) 
   return <SurveyRunner definition={definition} studentCode={session.studentCode} />;
 }
 
-function AccessGateForm({ onVerified }: { onVerified: (session: CollectorSession) => void }) {
+export function AccessGateForm({ onVerified }: { onVerified: (session: CollectorSession) => void }) {
   const [accessCode, setAccessCode] = useState("");
   const [studentCode, setStudentCode] = useState("");
   const [error, setError] = useState<string | null>(null);

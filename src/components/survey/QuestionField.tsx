@@ -86,23 +86,25 @@ function SingleChoiceInput({ question, value, onChange }: { question: Question; 
 
   return (
     <div className="space-y-2">
-      {question.options?.map((option) => (
-        <label
-          key={option.value}
-          className={`flex items-center gap-3 rounded-md border px-3 py-2 text-sm cursor-pointer ${
-            selected === option.value ? "border-slate-900 bg-slate-50" : "border-slate-200"
-          }`}
-        >
-          <input
-            type="radio"
-            name={question.code}
-            checked={selected === option.value}
-            onChange={() => onChange({ kind: "single", value: option.value, otherText: option.allowOther ? otherText : undefined })}
-            className="accent-slate-900"
-          />
-          {option.label}
-        </label>
-      ))}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+        {question.options?.map((option) => (
+          <label
+            key={option.value}
+            className={`flex items-center gap-3 rounded-md border px-3 py-2 text-sm cursor-pointer ${
+              selected === option.value ? "border-slate-900 bg-slate-50" : "border-slate-200"
+            }`}
+          >
+            <input
+              type="radio"
+              name={question.code}
+              checked={selected === option.value}
+              onChange={() => onChange({ kind: "single", value: option.value, otherText: option.allowOther ? otherText : undefined })}
+              className="accent-slate-900"
+            />
+            {option.label}
+          </label>
+        ))}
+      </div>
       {selectedOption?.allowOther && (
         <input
           type="text"
@@ -142,27 +144,29 @@ function MultiChoiceInput({ question, value, onChange }: { question: Question; v
   return (
     <div className="space-y-2">
       {question.maxSelections && <p className="text-xs text-slate-400">{values.length}/{question.maxSelections} selected</p>}
-      {question.options?.map((option) => {
-        const checked = values.includes(option.value);
-        const disabled = !checked && atMax && !option.exclusive;
-        return (
-          <label
-            key={option.value}
-            className={`flex items-center gap-3 rounded-md border px-3 py-2 text-sm ${checked ? "border-slate-900 bg-slate-50" : "border-slate-200"} ${
-              disabled ? "opacity-40" : "cursor-pointer"
-            }`}
-          >
-            <input
-              type="checkbox"
-              checked={checked}
-              disabled={disabled}
-              onChange={() => toggle(option.value, option.exclusive)}
-              className="accent-slate-900"
-            />
-            {option.label}
-          </label>
-        );
-      })}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+        {question.options?.map((option) => {
+          const checked = values.includes(option.value);
+          const disabled = !checked && atMax && !option.exclusive;
+          return (
+            <label
+              key={option.value}
+              className={`flex items-center gap-3 rounded-md border px-3 py-2 text-sm ${checked ? "border-slate-900 bg-slate-50" : "border-slate-200"} ${
+                disabled ? "opacity-40" : "cursor-pointer"
+              }`}
+            >
+              <input
+                type="checkbox"
+                checked={checked}
+                disabled={disabled}
+                onChange={() => toggle(option.value, option.exclusive)}
+                className="accent-slate-900"
+              />
+              {option.label}
+            </label>
+          );
+        })}
+      </div>
       {otherSelected && (
         <input
           type="text"

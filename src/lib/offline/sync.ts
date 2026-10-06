@@ -1,4 +1,5 @@
 import { offlineDb, type QueuedResponse } from "./db";
+import { getSurveyDefinition, isSurveyClosed } from "@/lib/surveys/registry";
 
 type Listener = (state: { pending: number; synced: number; syncing: boolean }) => void;
 
@@ -47,6 +48,13 @@ export async function flushQueue() {
 
   try {
     const pending = await offlineDb.responses.where("syncStatus").anyOf(["pending", "error"]).toArray();
+    // A survey's close time can be moved later (re-opened), so give previously
+    // rejected responses another go if they now fall inside the open window.
+    const rejected = await offlineDb.responses.where("syncStatus").equals("rejected").toArray();
+    for (const record of rejected) {
+      const definition = getSurveyDefinition(record.surveySlug);
+      if (definition && !isSurveyClosed(definition, new Date(record.completedAt))) pending.push(record);
+    }
     for (const record of pending) {
       await offlineDb.responses.update(record.clientUuid, { syncStatus: "syncing" });
       const result = await submitOne(record);

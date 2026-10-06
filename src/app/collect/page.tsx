@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { SURVEY_REGISTRY } from "@/lib/surveys/registry";
+import { SURVEY_REGISTRY, isSurveyClosed } from "@/lib/surveys/registry";
 
 export default function CollectIndexPage() {
   return (
@@ -13,7 +13,7 @@ export default function CollectIndexPage() {
             className="block bg-white rounded-xl border border-slate-200 p-4 hover:border-slate-400"
           >
             <p className="font-medium text-slate-900">{s.title}</p>
-            <p className="text-sm text-slate-500">~{s.estimatedMinutes ?? "?"} minutes</p>
+            <p className="text-sm text-slate-500">{isSurveyClosed(s) ? "Closed" : `~${s.estimatedMinutes ?? "?"} minutes`}</p>
           </Link>
         ))}
       </div>

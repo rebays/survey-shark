@@ -3,8 +3,10 @@
 import { useEffect, useState } from "react";
 import { getCollectorSession, setCollectorSession, type CollectorSession } from "@/lib/collector/session";
 import { SurveyRunner } from "@/components/survey/SurveyRunner";
+import { SyncStatusBar } from "@/components/survey/SyncStatusBar";
 import { SinuLogo } from "@/components/SinuLogo";
 import type { SurveyDefinition } from "@/lib/surveys/types";
+import { isSurveyClosed } from "@/lib/surveys/registry";
 
 export function CollectorGate({ definition }: { definition: SurveyDefinition }) {
   const [session, setSession] = useState<CollectorSession | null | undefined>(undefined);
@@ -18,8 +20,26 @@ export function CollectorGate({ definition }: { definition: SurveyDefinition }) 
   }, []);
 
   if (session === undefined) return null;
+  // Checked at runtime (not build time) because this page is prerendered and cached offline.
+  if (isSurveyClosed(definition)) return <SurveyClosed definition={definition} hasSession={session !== null} />;
   if (session === null) return <AccessGateForm onVerified={(s) => setSession(s)} />;
   return <SurveyRunner definition={definition} studentCode={session.studentCode} />;
+}
+
+function SurveyClosed({ definition, hasSession }: { definition: SurveyDefinition; hasSession: boolean }) {
+  return (
+    <div className="max-w-lg lg:max-w-2xl mx-auto px-4 py-10">
+      {/* Keeps any responses still queued on this device syncing up. */}
+      {hasSession && <SyncStatusBar slug={definition.slug} />}
+      <div className="bg-white rounded-xl border border-slate-200 p-6 lg:p-10 text-center space-y-3">
+        <SinuLogo className="mx-auto mb-3" />
+        <h1 className="text-lg font-semibold text-slate-900">This survey is closed</h1>
+        <p className="text-sm text-slate-600">
+          Data collection for {definition.title} has ended. No new responses can be recorded. Thank you for your work in the field.
+        </p>
+      </div>
+    </div>
+  );
 }
 
 export function AccessGateForm({ onVerified }: { onVerified: (session: CollectorSession) => void }) {

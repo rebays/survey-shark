@@ -19,7 +19,9 @@ async function notify() {
   for (const l of listeners) l({ pending, synced, syncing });
 }
 
-async function submitOne(record: QueuedResponse): Promise<boolean> {
+type SubmitResult = "ok" | "retry" | "rejected";
+
+async function submitOne(record: QueuedResponse): Promise<SubmitResult> {
   try {
     const res = await fetch("/api/responses", {
       method: "POST",
@@ -27,9 +29,12 @@ async function submitOne(record: QueuedResponse): Promise<boolean> {
       body: JSON.stringify(record),
     });
     // 200/201 = stored, 409 = already stored (idempotent replay) — both count as success.
-    return res.ok || res.status === 409;
+    if (res.ok || res.status === 409) return "ok";
+    // 410 = survey closed. Retrying will never succeed, so stop trying.
+    if (res.status === 410) return "rejected";
+    return "retry";
   } catch {
-    return false;
+    return "retry";
   }
 }
 
@@ -44,8 +49,15 @@ export async function flushQueue() {
     const pending = await offlineDb.responses.where("syncStatus").anyOf(["pending", "error"]).toArray();
     for (const record of pending) {
       await offlineDb.responses.update(record.clientUuid, { syncStatus: "syncing" });
-      const ok = await submitOne(record);
-      await offlineDb.responses.update(record.clientUuid, ok ? { syncStatus: "synced" } : { syncStatus: "error", lastError: "Could not reach server" });
+      const result = await submitOne(record);
+      await offlineDb.responses.update(
+        record.clientUuid,
+        result === "ok"
+          ? { syncStatus: "synced" }
+          : result === "rejected"
+            ? { syncStatus: "rejected", lastError: "Survey closed" }
+            : { syncStatus: "error", lastError: "Could not reach server" }
+      );
     }
   } finally {
     syncing = false;

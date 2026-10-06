@@ -46,6 +46,7 @@ export const facebookHoniara2026: SurveyDefinition = {
   title: "The State of Facebook Use in Honiara 2026",
   version: "1.0.0",
   estimatedMinutes: 15,
+  closedAt: "2026-10-06T00:10:00Z",
   introText: [
     "Tagio tumas for agreeing to participate in this survey.",
     "This questionnaire asks about your use of Facebook and its relationship with business, tourism, government communication and community wellbeing in Honiara.",

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { surveys, responses } from "@/lib/db/schema";
-import { getSurveyDefinition } from "@/lib/surveys/registry";
+import { getSurveyDefinition, isSurveyClosed } from "@/lib/surveys/registry";
 import { responseEnvelopeSchema } from "@/lib/surveys/validation";
 
 export async function POST(req: NextRequest) {
@@ -17,6 +17,12 @@ export async function POST(req: NextRequest) {
   const definition = getSurveyDefinition(envelope.surveySlug);
   if (!definition) {
     return NextResponse.json({ error: `Unknown survey slug: ${envelope.surveySlug}` }, { status: 400 });
+  }
+
+  // Judge by when the interview finished, not when it reached us, so responses
+  // collected offline before the close can still sync afterwards.
+  if (isSurveyClosed(definition, new Date(envelope.completedAt))) {
+    return NextResponse.json({ error: "This survey is closed and no longer accepts responses." }, { status: 410 });
   }
 
   // Ensure the survey (and this exact version's definition snapshot) exists in the DB.

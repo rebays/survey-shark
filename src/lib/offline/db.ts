@@ -2,7 +2,7 @@ import Dexie, { type Table } from "dexie";
 import type { ResponseEnvelope } from "@/lib/surveys/types";
 
 export interface QueuedResponse extends ResponseEnvelope {
-  syncStatus: "pending" | "syncing" | "synced" | "error";
+  syncStatus: "pending" | "syncing" | "synced" | "error" | "rejected";
   lastError?: string;
   queuedAt: string;
 }

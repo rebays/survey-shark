@@ -55,6 +55,12 @@ export interface SurveyDefinition {
   title: string;
   version: string;
   estimatedMinutes?: number;
+  /**
+   * ISO timestamp after which the survey stops accepting responses. Anything completed
+   * before this (e.g. filled in offline and synced later) is still accepted. Admin
+   * viewing and CSV export are unaffected.
+   */
+  closedAt?: string;
   introText?: string[];
   screenOutText?: string[];
   thankYouText?: string[];

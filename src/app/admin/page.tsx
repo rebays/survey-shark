@@ -8,6 +8,7 @@ import { logoutAction } from "./actions";
 import { RosterForm } from "./RosterForm";
 import { SinuLogo } from "@/components/SinuLogo";
 import { TARGET_PER_STUDENT } from "@/lib/surveys/constants";
+import { getSurveyDefinition, isSurveyClosed } from "@/lib/surveys/registry";
 
 const RESPONSE_LIST_COLUMNS = {
   clientUuid: responses.clientUuid,
@@ -100,10 +101,15 @@ export default async function AdminDashboardPage({ searchParams }: { searchParam
             {Array.from(new Set(surveyRows.map((s) => s.slug))).map((slug) => {
               const latest = latestBySlug.get(slug)!;
               const stats = bySlug.get(slug) ?? { total: 0, completed: 0, screenedOut: 0 };
+              const definition = getSurveyDefinition(slug);
+              const closed = definition ? isSurveyClosed(definition) : false;
               return (
                 <div key={slug} className="bg-white rounded-xl border border-slate-200 p-5 flex items-center justify-between">
                   <div>
-                    <p className="font-medium text-slate-900">{latest.title}</p>
+                    <p className="font-medium text-slate-900">
+                      {latest.title}
+                      {closed && <span className="ml-2 align-middle text-xs font-medium rounded-full bg-slate-100 text-slate-600 px-2 py-0.5">Closed</span>}
+                    </p>
                     <p className="text-sm text-slate-500">
                       {stats.completed} completed · {stats.screenedOut} screened out · version {latest.version}
                     </p>

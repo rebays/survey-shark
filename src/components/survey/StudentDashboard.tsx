@@ -28,6 +28,8 @@ export function StudentDashboard({ slug, studentCode, surveyTitle }: { slug: str
   const [offlineFallback, setOfflineFallback] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selectedUuid, setSelectedUuid] = useState<string | null>(null);
+  const [downloading, setDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
 
   async function load() {
     setLoading(true);
@@ -52,6 +54,30 @@ export function StudentDashboard({ slug, studentCode, surveyTitle }: { slug: str
       setOfflineFallback(true);
     } finally {
       setLoading(false);
+    }
+  }
+
+  // Fetched rather than a plain link so we can show a clear message when offline,
+  // instead of the browser's own failed-download page.
+  async function downloadResponses() {
+    setDownloading(true);
+    setDownloadError(null);
+    try {
+      const res = await fetch(`/api/collector/export?slug=${encodeURIComponent(slug)}&studentCode=${encodeURIComponent(studentCode)}`, { cache: "no-store" });
+      if (!res.ok) throw new Error("request failed");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${slug}-${studentCode.replace(/[^A-Za-z0-9_-]/g, "_")}-responses.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      setDownloadError("Couldn't download right now — you need signal for this. Try again once you're back online.");
+    } finally {
+      setDownloading(false);
     }
   }
 
@@ -120,6 +146,22 @@ export function StudentDashboard({ slug, studentCode, surveyTitle }: { slug: str
                 <p className="text-sm text-slate-500 mb-1">Screened out (ineligible participants)</p>
                 <p className="text-2xl font-semibold text-slate-900">{stats?.screenedOut ?? 0}</p>
               </div>
+            </div>
+
+            <div className="bg-white rounded-xl border border-slate-200 p-6">
+              <h2 className="text-sm font-medium text-slate-900 mb-1">Download my responses</h2>
+              <p className="text-sm text-slate-500 mb-3">
+                Save every response you&apos;ve submitted as a spreadsheet file (CSV) that opens in Excel.
+                Needs signal; only responses already synced to the server are included.
+              </p>
+              <button
+                onClick={() => void downloadResponses()}
+                disabled={downloading}
+                className="text-sm font-medium rounded-md bg-slate-900 text-white px-4 py-2 hover:bg-slate-800 disabled:opacity-60"
+              >
+                {downloading ? "Preparing…" : "Download (Excel / CSV)"}
+              </button>
+              {downloadError && <p className="text-sm text-amber-700 mt-2">{downloadError}</p>}
             </div>
 
             <div>

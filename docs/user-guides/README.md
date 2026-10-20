@@ -1,9 +1,12 @@
 # User guides
 
-Two PDF guides for the two kinds of people who use this platform:
+PDF guides for the two kinds of people who use this platform:
 
 - **`Survey-Shark-Field-Collector-Guide.pdf`** — for students doing fieldwork
   (`/collect`): one-time setup, collecting responses, working offline, troubleshooting.
+- **`Survey-Shark-Download-Responses-Guide.pdf`** — for students: downloading their
+  own responses from "My progress" (`/api/collector/export`) and opening/saving them
+  in Excel.
 - **`Survey-Shark-Researcher-Admin-Guide.pdf`** — for the researcher running the
   study (`/admin`): logging in, roster management, monitoring progress, exporting
   data.
@@ -34,6 +37,9 @@ python3 -m pip install reportlab pillow   # once
 cd docs/user-guides
 python3 scripts/generate_student_guide.py
 python3 scripts/generate_admin_guide.py
+python3 scripts/generate_export_guide.py
 ```
 
-This overwrites the two PDFs in place.
+This overwrites the PDFs in place. The download guide's screenshots
+(`dashboard-download-button.jpg`, `download-offline-error.jpg`) use made-up sample
+data (stubbed `fetch` responses), not real student records.
